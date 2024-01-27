@@ -46,6 +46,7 @@ public class PlayerController : MonoBehaviour
     public bool isSprinting;
     public bool isCrouching;
     public bool canUnCrouch;
+    public bool canSprint;
 
     [Header("Coroutines")]
     public Coroutine crouchStart;
@@ -62,13 +63,14 @@ public class PlayerController : MonoBehaviour
     {
         canUnCrouch = true;
         canJump = true;
+        canSprint = true;
 
     }
 
     // Update is called once per frame
     void Update()
     {
-        Debug.Log(characterController.isGrounded);
+        //Debug.Log(characterController.isGrounded);
         isGrounded = characterController.isGrounded;
         CalculateMovement();
         ApplyGravity();
@@ -105,12 +107,12 @@ public class PlayerController : MonoBehaviour
         verticalInput = Input.GetAxisRaw("Vertical");
 
 
-        if(isGrounded && !isCrouching && !isSprinting)
+        if(isGrounded && !isCrouching || !isSprinting)
         {
             currentMoveSpeed = walkSpeed;
         }
 
-        if (Input.GetKey(sprintKey) && isGrounded && !isCrouching && (horizontalInput != 0 || verticalInput != 0))
+        if (Input.GetKey(sprintKey) && isGrounded && !isCrouching && (horizontalInput != 0 || verticalInput != 0) && canSprint)
         {
             isSprinting = true;
             currentMoveSpeed = sprintSpeed;
