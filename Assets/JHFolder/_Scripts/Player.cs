@@ -57,7 +57,7 @@ public class Player : MonoBehaviour, IcanPing
     public AudioClip chuckleSound;
     public AudioClip laughSound;
     public AudioClip hystericalLaughSound;
-    public float normalLaughVolume = 0.8f;
+    public float normalLaughVolume = 0.4f;
     public float suppressedLaughVolume = 0.1f;
 
     [Header("Debug")]
@@ -143,11 +143,11 @@ public class Player : MonoBehaviour, IcanPing
     void Update()
     {
         SprintOxygen();
-        if(Input.GetMouseButton(1) && canHoldBreath) 
+        if(Input.GetMouseButton(1) && canHoldBreath || isHoldingBreath && Input.GetMouseButtonDown(1)) 
         {
             HoldBreath();
         }
-        else if(!isConsumingOxygen)
+        else if(!isConsumingOxygen && !isInGas)
         {
             RegenBreath();
         }
@@ -212,19 +212,39 @@ public class Player : MonoBehaviour, IcanPing
     {
         if (currentLevel == LaughterLevel.level1)
         {
+            if (isHoldingBreath)
+            {
+                PingForEnemy(transform.position, level1AlertRadius / 1.5f, level1AttackRadius);
+            }
+            else
             PingForEnemy(transform.position, level1AlertRadius, level1AttackRadius);
         }
         else if (currentLevel == LaughterLevel.level2)
         {
-            PingForEnemy(transform.position, level2AlertRadius, level2AttackRadius);
+            if (isHoldingBreath)
+            {
+                PingForEnemy(transform.position, level2AlertRadius / 1.5f, level2AttackRadius);
+            }
+            else
+                PingForEnemy(transform.position, level2AlertRadius, level2AttackRadius);
         }
         else if (currentLevel == LaughterLevel.level3)
         {
-            PingForEnemy(transform.position, level3AlertRadius, level3AttackRadius);
+            if (isHoldingBreath)
+            {
+                PingForEnemy(transform.position, level3AlertRadius / 1.5f, level3AttackRadius);
+            }
+            else
+                PingForEnemy(transform.position, level3AlertRadius, level3AttackRadius);
         }
         else if (currentLevel == LaughterLevel.level4)
         {
-            PingForEnemy(transform.position, level4AlertRadius, level4AttackRadius);
+            if (isHoldingBreath)
+            {
+                PingForEnemy(transform.position, level4AlertRadius, level4AttackRadius);
+            }
+            else
+                PingForEnemy(transform.position, level4AlertRadius, level4AttackRadius);
         }
         else
         {

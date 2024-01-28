@@ -10,6 +10,13 @@ public class MainMenuManager : MonoBehaviour
     public Button playButton;
     public Button quitButton;
 
+    private void Awake()
+    {
+        Time.timeScale = 1.0f;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+    }
+
     public void PlayGame()
     {
         StartCoroutine(StartGame());
