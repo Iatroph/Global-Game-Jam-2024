@@ -92,6 +92,7 @@ public class PlayerController : MonoBehaviour, IcanPing
     {
         characterController = GetComponent<CharacterController>();
         normalCCHeight = characterController.height;
+        characterController.detectCollisions = true;
     }
 
     public void PingForEnemy(Vector3 pos, float allertRad, float attackRad)

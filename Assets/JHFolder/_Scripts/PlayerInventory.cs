@@ -16,6 +16,7 @@ public class PlayerInventory : MonoBehaviour
     public TMP_Text keysText;
     public TMP_Text fadeText;
     public GameObject escapedImage;
+    public GameObject deathImage;
 
     [Header("Parameters")]
     public float PickUpRange = 5;
@@ -191,5 +192,31 @@ public class PlayerInventory : MonoBehaviour
             yield return null;
         }
         isTextFading = false;
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.transform.GetComponent<EnemyMovement>() || collision.transform.tag == "Enemy")
+        {
+            deathImage.SetActive(true);
+            Time.timeScale = 0;
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+
+        }
+
+        Debug.Log(collision.transform.name);
+    }
+
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        if (hit.transform.GetComponent<EnemyMovement>() || hit.transform.tag == "Enemy")
+        {
+            deathImage.SetActive(true);
+            Time.timeScale = 0;
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+
+        }
     }
 }

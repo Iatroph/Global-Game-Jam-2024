@@ -2119,6 +2119,7 @@ MonoBehaviour:
   keysText: {fileID: 2766983881681512430}
   fadeText: {fileID: 1051316745246888403}
   escapedImage: {fileID: 8414887842459518796}
+  deathImage: {fileID: 5898667401641404982}
   PickUpRange: 3
   audioSource: {fileID: 8023535156357831778}
   keyPickUpSFX: {fileID: 8300000, guid: f363c8ad319be4041ad28b715420d2de, type: 3}
@@ -2140,7 +2141,7 @@ CharacterController:
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 136
