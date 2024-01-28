@@ -199,7 +199,7 @@ Light:
   m_Shape: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 5
-  m_Range: 25
+  m_Range: 30
   m_SpotAngle: 80
   m_InnerSpotAngle: 7
   m_CookieSize: 10
@@ -1599,7 +1599,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &424840786422994138
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1666,7 +1666,7 @@ GameObject:
   - component: {fileID: 1010599432387414217}
   - component: {fileID: 404382806172764883}
   - component: {fileID: 3996950852576771129}
-  - component: {fileID: 8578951439077450804}
+  - component: {fileID: 8286263845272708470}
   m_Layer: 0
   m_Name: Player Camera
   m_TagString: MainCamera
@@ -1732,7 +1732,7 @@ Camera:
     serializedVersion: 2
     m_Bits: 511
   m_RenderingPath: -1
-  m_TargetTexture: {fileID: 0}
+  m_TargetTexture: {fileID: 8400000, guid: d0e22be9aa6a8db40a4741b96e8fe9bb, type: 2}
   m_TargetDisplay: 0
   m_TargetEye: 3
   m_HDR: 1
@@ -1769,7 +1769,7 @@ MonoBehaviour:
   sensitivity: 1
   useIndividualSensitivity: 0
   allowMouseInput: 1
---- !u!114 &8578951439077450804
+--- !u!114 &8286263845272708470
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1998,12 +1998,12 @@ MonoBehaviour:
   laughterAudioSource: {fileID: 4225196108535465530}
   maxHealth: 100
   maxOxygen: 100
-  oxygenRegenRate: 7
+  oxygenRegenRate: 7.5
   oxygenDecayRateWhileSprinting: 18
   oxygenDecayRateWhileHoldingBreath: 10
   maxLaughter: 100
   laughterHoldBreathMultiplier: 0
-  laughterDecayRate: 4
+  laughterDecayRate: 5
   laughterDecayDelay: 2
   oxygenSlider: {fileID: 7648517357092392233}
   laughSlider: {fileID: 463371642314676682}
@@ -2025,8 +2025,8 @@ MonoBehaviour:
   chuckleSound: {fileID: 8300000, guid: 11ad599bf1c777e4095f2b13251c7f65, type: 3}
   laughSound: {fileID: 8300000, guid: ec9cb7bf7c07b8f48a4c71563ffe2170, type: 3}
   hystericalLaughSound: {fileID: 8300000, guid: c40c107cd4c77cb4fbed766c3b66945f, type: 3}
-  normalLaughVolume: 0.1
-  suppressedLaughVolume: 0.05
+  normalLaughVolume: 0.07
+  suppressedLaughVolume: 0.03
   currentHealth: 100
   currentOxygen: 100
   currentLaughter: 0

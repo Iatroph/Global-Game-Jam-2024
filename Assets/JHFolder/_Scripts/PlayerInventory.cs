@@ -20,6 +20,7 @@ public class PlayerInventory : MonoBehaviour
 
     [Header("Parameters")]
     public float PickUpRange = 5;
+    public int keysNeeded;
 
     [Header("Audio")]
     public AudioSource audioSource;
@@ -123,7 +124,7 @@ public class PlayerInventory : MonoBehaviour
                 if (hit.collider.GetComponent<Key>())
                 {
                     keysOwned++;
-                    if(keysOwned == 3)
+                    if(keysOwned >= keysNeeded)
                     {
                         keysText.color = Color.red;
                             
@@ -147,12 +148,12 @@ public class PlayerInventory : MonoBehaviour
 
                 if (hit.collider.GetComponent<EscapeDoor>())
                 {
-                    if(keysOwned < 3)
+                    if(keysOwned < keysNeeded)
                     {
                         if(!isTextFading)
                         StartCoroutine(TextFade(fadeText, 2));
                     }
-                    else if(keysOwned >= 3)
+                    else if(keysOwned >= keysNeeded)
                     {
                         escapedImage.SetActive(true);
                         Time.timeScale = 0;

@@ -143,9 +143,16 @@ public class Player : MonoBehaviour, IcanPing
     void Update()
     {
         SprintOxygen();
-        if(Input.GetMouseButton(1) && canHoldBreath || isHoldingBreath && Input.GetMouseButtonDown(1)) 
+        if(Input.GetMouseButton(1)) 
         {
-            HoldBreath();
+            if(isHoldingBreath && isInGas)
+            {
+                HoldBreath();
+            }
+            else if (canHoldBreath && !isInGas)
+            {
+                HoldBreath();
+            }
         }
         else if(!isConsumingOxygen && !isInGas)
         {
@@ -171,7 +178,7 @@ public class Player : MonoBehaviour, IcanPing
             laughterAudioSource.volume = normalLaughVolume;
         }
 
-        if(Input.GetMouseButtonDown(1) && canHoldBreath)
+        if(Input.GetMouseButtonDown(1) && canHoldBreath && !isInGas)
         {
             audioSource.clip = holdBreathSound;
             audioSource.Play();
