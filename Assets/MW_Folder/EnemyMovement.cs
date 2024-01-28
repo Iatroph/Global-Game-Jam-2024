@@ -82,12 +82,12 @@ public class EnemyMovement : MonoBehaviour
 
         if (actveState == States.Hunting)
         {
-            agent.speed = 5f;
+            agent.speed = 6f;
             kindaHunting = false;
         }
-        else if (agent.speed == 5)
+        else if (agent.speed == 6)
         {
-            agent.speed = 3.5f;
+            agent.speed = 4.5f;
         }
     }
 
@@ -125,5 +125,11 @@ public class EnemyMovement : MonoBehaviour
     {
         actveState = States.Hunting;
         agent.SetDestination(player.transform.position);
+    }
+
+    public void attackDecoy(Vector3 target)
+    {
+        actveState = States.Hunting;
+        agent.SetDestination(target);
     }
 }

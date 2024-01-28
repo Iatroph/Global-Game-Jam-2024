@@ -5,7 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Player : MonoBehaviour
+public class Player : MonoBehaviour, IcanPing
 {
     [Header("References")]
     private PlayerController cc;
@@ -35,6 +35,18 @@ public class Player : MonoBehaviour
     public float laughterOverlayAlpha;
     public float laughterOverlayFadeTime;
 
+    [Header("Laugh Parameters")]
+    public float level1AlertRadius = 15;
+    public float level2AlertRadius = 20;
+    public float level3AlertRadius = 25;
+    public float level4AlertRadius = 30;
+    public float level1AttackRadius = 5;
+    public float level2AttackRadius = 10;
+    public float level3AttackRadius = 15;
+    public float level4AttackRadius = 20;
+
+
+
     [Header("Keycodes")]
     public KeyCode holdBreathBind = KeyCode.Mouse1;
 
@@ -59,12 +71,60 @@ public class Player : MonoBehaviour
     public bool isLaughAudioPlaying;
     public bool isInGas;
     public bool canHoldBreath;
+    public bool doesLaughterDecay = true;
 
     private Coroutine shiftAlpha;
+
+    public LaughterLevel currentLevel;
+    private float currentAlert = 0;
+    private float currentAttack = 0;
+    public enum LaughterLevel
+    {
+        level0 = 0, level1 = 1, level2 = 2, level3 = 3, level4 = 4,
+    }
 
     private void Awake()
     {
         cc = GetComponent<PlayerController>();
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = new Vector4(1, 0, 0, .5f);
+
+        Gizmos.DrawSphere(transform.position, currentAlert);
+        Gizmos.color = new Vector4(0, 1, 0, .5f);
+
+        Gizmos.DrawSphere(transform.position, currentAttack);
+    }
+
+    public void PingForEnemy(Vector3 pos, float allertRad, float attackRad)
+    {
+        EnemyMovement enemy = null;
+        Collider[] collisions = Physics.OverlapSphere(pos, allertRad);
+
+        foreach (Collider x in collisions)
+        {
+            if (x.TryGetComponent<EnemyMovement>(out enemy))
+            {
+                break;
+            }
+        }
+
+        if (enemy != null)
+        {
+            float dist = Vector3.Distance(pos, enemy.transform.position);
+            if (dist < allertRad)
+            {
+                enemy.alertMe(transform.position);
+            }
+            if (dist < attackRad)
+            {
+                enemy.attackDecoy(pos);
+            }
+
+        }
+
     }
 
     // Start is called before the first frame update
@@ -133,7 +193,7 @@ public class Player : MonoBehaviour
             cc.canSprint = true;
         }
 
-        if(currentLaughter > 0)
+        if(currentLaughter > 0 && doesLaughterDecay)
         {
             laugherDecayDelayTimer -= Time.deltaTime;
             if(laugherDecayDelayTimer <= 0)
@@ -143,8 +203,33 @@ public class Player : MonoBehaviour
             }
         }
 
+        TriggerMonster();
         LaughterAudio();
 
+    }
+
+    private void TriggerMonster()
+    {
+        if (currentLevel == LaughterLevel.level1)
+        {
+            PingForEnemy(transform.position, level1AlertRadius, level1AttackRadius);
+        }
+        else if (currentLevel == LaughterLevel.level2)
+        {
+            PingForEnemy(transform.position, level2AlertRadius, level2AttackRadius);
+        }
+        else if (currentLevel == LaughterLevel.level3)
+        {
+            PingForEnemy(transform.position, level3AlertRadius, level3AttackRadius);
+        }
+        else if (currentLevel == LaughterLevel.level4)
+        {
+            PingForEnemy(transform.position, level4AlertRadius, level4AttackRadius);
+        }
+        else
+        {
+
+        }
     }
 
     public void TakeDamage(float damage)
@@ -183,6 +268,10 @@ public class Player : MonoBehaviour
                 laughterAudioSource.clip = giggleSound;
                 if (!isLaughAudioPlaying)
                 {
+                    currentLevel = (LaughterLevel)1;
+                    currentAlert = level1AlertRadius;
+                    currentAttack = level1AttackRadius;
+                    //PingForEnemy(transform.position, level1AlertRadius, level1AttackRadius);
                     isLaughAudioPlaying = true;
                     laughterAudioSource.Play();
                 }
@@ -198,6 +287,10 @@ public class Player : MonoBehaviour
                 laughterAudioSource.clip = chuckleSound;
                 if (!isLaughAudioPlaying)
                 {
+                    currentLevel = (LaughterLevel)2;
+                    currentAlert = level2AlertRadius;
+                    currentAttack = level2AttackRadius;
+                    //PingForEnemy(transform.position, level2AlertRadius, level2AttackRadius);
                     isLaughAudioPlaying = true;
                     laughterAudioSource.Play();
                 }
@@ -213,6 +306,10 @@ public class Player : MonoBehaviour
                 laughterAudioSource.clip = laughSound;
                 if (!isLaughAudioPlaying)
                 {
+                    currentLevel = (LaughterLevel)3;
+                    currentAlert = level3AlertRadius;
+                    currentAttack = level3AttackRadius;
+                    //PingForEnemy(transform.position, level3AlertRadius, level3AttackRadius);
                     isLaughAudioPlaying = true;
                     laughterAudioSource.Play();
                 }
@@ -228,6 +325,10 @@ public class Player : MonoBehaviour
                 laughterAudioSource.clip = hystericalLaughSound;
                 if (!isLaughAudioPlaying)
                 {
+                    currentLevel = (LaughterLevel)4;
+                    currentAlert = level4AlertRadius;
+                    currentAttack = level4AttackRadius;
+                    //PingForEnemy(transform.position, level4AlertRadius, level4AttackRadius);
                     isLaughAudioPlaying = true;
                     laughterAudioSource.Play();
                 }
@@ -241,7 +342,10 @@ public class Player : MonoBehaviour
         }
         else if(currentLaughter <= 0)
         {
+            currentAlert = 0;
+            currentAttack = 0;
             isLaughing = false;
+            currentLevel = 0;
             laughterAudioSource.Stop();
         }
 

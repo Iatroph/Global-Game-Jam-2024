@@ -2,8 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
+using static Player;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, IcanPing
 {
     float horizontalInput;
     float verticalInput;
@@ -62,10 +63,64 @@ public class PlayerController : MonoBehaviour
     public Coroutine crouchStart;
     public Coroutine crouchEnd;
 
+    public SoundLevel currentLevel = SoundLevel.level0;
+    private float currentAlert = 0;
+    private float currentAttack = 0;
+
+    private float crouchAlert = 5;
+    private float crouchAttack = 3;
+    private float walkingAlert = 10;
+    private float walkingAttack = 5;
+    private float sprintingAlert = 15;
+    private float sprintingAttack = 10;
+    public enum SoundLevel
+    {
+        level0 = 0, level1 = 1, level2 = 2, level3 = 3,
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = new Vector4(0, 0, 1, .5f);
+
+        Gizmos.DrawSphere(transform.position, currentAlert);
+        Gizmos.color = new Vector4(1, 1, 0, .5f);
+
+        Gizmos.DrawSphere(transform.position, currentAttack);
+    }
+
     private void Awake()
     {
         characterController = GetComponent<CharacterController>();
         normalCCHeight = characterController.height;
+    }
+
+    public void PingForEnemy(Vector3 pos, float allertRad, float attackRad)
+    {
+        EnemyMovement enemy = null;
+        Collider[] collisions = Physics.OverlapSphere(pos, allertRad);
+
+        foreach (Collider x in collisions)
+        {
+            if (x.TryGetComponent<EnemyMovement>(out enemy))
+            {
+                break;
+            }
+        }
+
+        if (enemy != null)
+        {
+            float dist = Vector3.Distance(pos, enemy.transform.position);
+            if (dist < allertRad)
+            {
+                enemy.alertMe(transform.position);
+            }
+            if (dist < attackRad)
+            {
+                enemy.attackDecoy(pos);
+            }
+
+        }
+
     }
 
     // Start is called before the first frame update
@@ -108,6 +163,51 @@ public class PlayerController : MonoBehaviour
                 characterController.stepOffset = 0;
             }
         }
+
+        if(!isCrouching && !isSprinting && !isJumping && (horizontalInput != 0 || verticalInput != 0))
+        {
+            currentLevel = SoundLevel.level2;
+        }
+        else if (isSprinting)
+        {
+            currentLevel = SoundLevel.level3;
+        }
+        else if(isCrouching && (horizontalInput != 0 || verticalInput != 0))
+        {
+            currentLevel = SoundLevel.level1;
+        }
+        else if(horizontalInput == 0 || verticalInput == 0)
+        {
+            currentLevel = SoundLevel.level0;
+        }
+
+
+        switch (currentLevel)
+        {
+            case SoundLevel.level0:
+                currentAlert = 0;
+                currentAttack = 0;
+                break;
+            case SoundLevel.level1:
+                currentAlert = crouchAlert;
+                currentAttack = crouchAttack;
+                PingForEnemy(transform.position, crouchAlert, crouchAttack);
+
+                break;
+            case SoundLevel.level2:
+                currentAlert = walkingAlert;
+                currentAttack = walkingAttack;
+                PingForEnemy(transform.position, walkingAlert, walkingAttack);
+                break;
+            case SoundLevel.level3:
+                currentAlert = sprintingAlert;
+                currentAttack = sprintingAttack;
+                PingForEnemy(transform.position, sprintingAlert, sprintingAttack);
+                break;
+
+
+        }
+            
 
         FootSteps();
         ApplyMovement();
