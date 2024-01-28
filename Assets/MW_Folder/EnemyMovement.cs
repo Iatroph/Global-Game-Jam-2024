@@ -24,7 +24,16 @@ public class EnemyMovement : MonoBehaviour
     [SerializeField]
     private List<Transform> waypoints;
     [SerializeField]
-    private float distanceToTarget;
+    private float
+        timer,
+        timer2,
+        distanceToTarget, //How far the enemy has to be from the target to lose agro
+        susDistance, // How far the enemy has to be from the susPoint to lose suspition
+        susRad; // The radius of the circle that will have a random point for the enemy to search
+    [SerializeField]
+    private Vector3 susPoint;
+
+    bool kindaHunting;
 
     private void Start()
     {
@@ -40,21 +49,45 @@ public class EnemyMovement : MonoBehaviour
         switch (actveState)
         {
             case States.Wandering:
-                if (Vector3.Distance(transform.position, agent.destination) <= distanceToTarget)
+                if (Vector3.Distance(transform.position, agent.destination) <= distanceToTarget) //moves to random waypoint if clost to another waypoint
                 {
                     agent.SetDestination(getWaypoint());
+                    alertMe(transform.position);
+                    timer = 0f;
                 }
                 break;
             case States.Hunting:
-                agent.SetDestination(player.transform.position);
+                if(Vector3.Distance(transform.position, agent.destination) <= distanceToTarget && timer >= 4f)
+                {
+                    actveState = States.Suspitious;
+                    timer = 0;
+                }
+                else
+                {
+                    timer += Time.deltaTime;
+                }
                 break;
             case States.Catchup:
                 break;
             case States.Suspitious:
-                agent.SetDestination(player.transform.position);
+                if (Vector3.Distance(transform.position, agent.destination) <= susDistance && !kindaHunting)
+                {
+                    actveState = States.Wandering;
+                    agent.SetDestination(getWaypoint());
+                }
                 break;
             case States.Scared:
                 break;
+        }
+
+        if (actveState == States.Hunting)
+        {
+            agent.speed = 5f;
+            kindaHunting = false;
+        }
+        else if (agent.speed == 5)
+        {
+            agent.speed = 3.5f;
         }
     }
 
@@ -63,14 +96,34 @@ public class EnemyMovement : MonoBehaviour
         return waypoints[Random.Range(0, waypoints.Count)].position; //Gets the position of a random waypoint
     }
 
-    public void allertMe()
+    private Vector3 getSusPoint(Vector3 target)
+    {
+        //Debug.Log("tar" + target);
+        susPoint = target + new Vector3(Random.Range(-susRad, susRad), 0, Random.Range(-susRad, susRad));
+        //Debug.Log("point" + susPoint);
+        return susPoint;
+    }
+
+    private void setSusPoint(Vector3 target)
+    {
+        susPoint = target;
+    }
+
+    public void alertMe(Vector3 target)
     {
         actveState = States.Suspitious;
+        do
+        {
+            //Debug.Log("uuuhhh");
+            Vector3 newTarget = getSusPoint(target);
+            agent.SetDestination(newTarget);
+            setSusPoint(newTarget);
+        } while (!agent.CalculatePath(agent.destination, agent.path));
     }
 
     public void attackPlayer()
     {
         actveState = States.Hunting;
+        agent.SetDestination(player.transform.position);
     }
-
 }
