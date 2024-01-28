@@ -4,5 +4,11 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/JHFolder/MainMenu.unity
+    guid: fb0f98f20429215488caa3f5b41a4270
+  - enabled: 1
+    path: Assets/JHFolder/CharacterControllerTesting.unity
+    guid: d42572a8483c86c48a7cf91dc751aab6
   m_configObjects: {}
