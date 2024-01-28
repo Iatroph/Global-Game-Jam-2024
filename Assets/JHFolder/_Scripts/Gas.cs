@@ -6,23 +6,31 @@ public class Gas : MonoBehaviour
 {
     [Header("Parameters")]
     public float laughterBuildUp;
-    
-    // Start is called before the first frame update
-    void Start()
+
+    private void OnTriggerEnter(Collider other)
     {
-        
+        if (other.tag == "Player")
+        {
+            other.gameObject.GetComponent<Player>().FadeLaughterOverlay(true);
+        }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
     private void OnTriggerStay(Collider other)
     {
         if(other.tag == "Player")
         {
             other.gameObject.GetComponent<Player>().Laughter(laughterBuildUp);
+            other.gameObject.GetComponent<Player>().canHoldBreath = false;
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.tag == "Player")
+        {
+            other.gameObject.GetComponent<Player>().FadeLaughterOverlay(false);
+            other.gameObject.GetComponent<Player>().canHoldBreath = true;
+
         }
     }
 }

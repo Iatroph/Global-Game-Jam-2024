@@ -12,6 +12,7 @@ public class PlayerController : MonoBehaviour
     public Transform orientation;
     private CharacterController characterController;
     public Camera playerCam;
+    public AudioSource audioSource;
 
     [Header("Controller Parameters")]
     public float walkSpeed;
@@ -22,6 +23,7 @@ public class PlayerController : MonoBehaviour
     public float jumpCoolDown;
 
     [Header("Crouch Parameters")]
+    public bool crouchToggle = false;
     public float heightChangeTime = 0.2f;
     public Vector3 normalCameraHeight = new Vector3(0, 0.75f, 0);
     public Vector3 crouchCameraHeight = new Vector3(0, 0.25f, 0);
@@ -30,11 +32,18 @@ public class PlayerController : MonoBehaviour
     private Vector3 normalCCCenter = Vector3.zero;
     private Vector3 crouchCenter = new Vector3(0, -0.5f, 0);
 
-
     [Header("Keycodes")]
     public KeyCode jumpKey;
     public KeyCode sprintKey = KeyCode.LeftShift;
     public KeyCode crouchKey = KeyCode.C;
+
+    [Header("Audio")]
+    public AudioClip[] footstepsArray;
+    public float footStepWalkInterval;
+    public float footStepSprintInterval;
+    public float footStepCrouchInterval;
+
+    private float footStepTimer;
 
     [Header("Debug")]
     public Vector3 moveDir;
@@ -47,6 +56,7 @@ public class PlayerController : MonoBehaviour
     public bool isCrouching;
     public bool canUnCrouch;
     public bool canSprint;
+    public bool isMoving;
 
     [Header("Coroutines")]
     public Coroutine crouchStart;
@@ -64,12 +74,14 @@ public class PlayerController : MonoBehaviour
         canUnCrouch = true;
         canJump = true;
         canSprint = true;
-
+        currentMoveSpeed = walkSpeed;
+        footStepTimer = 0;
     }
 
     // Update is called once per frame
     void Update()
     {
+
         //Debug.Log(characterController.isGrounded);
         isGrounded = characterController.isGrounded;
         CalculateMovement();
@@ -97,7 +109,7 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-
+        FootSteps();
         ApplyMovement();
     }
 
@@ -106,30 +118,58 @@ public class PlayerController : MonoBehaviour
         horizontalInput = Input.GetAxisRaw("Horizontal");
         verticalInput = Input.GetAxisRaw("Vertical");
 
-
-        if(isGrounded && !isCrouching || !isSprinting)
+        if(horizontalInput > 0 || verticalInput > 0)
         {
-            currentMoveSpeed = walkSpeed;
-        }
-
-        if (Input.GetKey(sprintKey) && isGrounded && !isCrouching && (horizontalInput != 0 || verticalInput != 0) && canSprint)
-        {
-            isSprinting = true;
-            currentMoveSpeed = sprintSpeed;
+            isMoving = true;
         }
         else
         {
+            isMoving = false;
+        }
+
+        if (Input.GetKey(sprintKey) && isGrounded /*&& !isCrouching*/ && (horizontalInput != 0 || verticalInput != 0) && canSprint)
+        {
+            if(isCrouching)
+            {
+                isCrouching = false;
+                EndCrouch();
+            }
+
+            isSprinting = true;
+            currentMoveSpeed = sprintSpeed;
+        }
+        else if(isSprinting && !isCrouching)
+        {
             isSprinting = false;
+            currentMoveSpeed = walkSpeed;
         }
 
         if(Input.GetKeyDown(crouchKey) && isGrounded && !isSprinting)
         {
-            isCrouching = true;
-            currentMoveSpeed = crouchSpeed;
-            BeginCrouch();
+
+            if(crouchToggle && isCrouching == false)
+            {
+                isCrouching = true;
+                currentMoveSpeed = crouchSpeed;
+                BeginCrouch();
+            }
+            else if (crouchToggle && isCrouching)
+            {
+                isCrouching = false;
+                currentMoveSpeed = walkSpeed;
+                EndCrouch();
+            }
+            else
+            {
+                isCrouching = true;
+                currentMoveSpeed = crouchSpeed;
+                BeginCrouch();
+            }
+
         }
 
-        if(Input.GetKeyUp(crouchKey) && isCrouching && canUnCrouch || isCrouching && !isGrounded && canUnCrouch || isCrouching && canUnCrouch && !Input.GetKey(crouchKey))
+
+        if(Input.GetKeyUp(crouchKey) && isCrouching && canUnCrouch && !crouchToggle || isCrouching && !isGrounded && canUnCrouch || isCrouching && canUnCrouch && !Input.GetKey(crouchKey) && !crouchToggle)
         {
             isCrouching = false;
             currentMoveSpeed = walkSpeed;
@@ -143,6 +183,44 @@ public class PlayerController : MonoBehaviour
     private void ApplyMovement()
     {
         characterController.Move(moveDir * Time.deltaTime);
+    }
+
+    private void FootSteps()
+    {
+        if(horizontalInput == 0 && verticalInput == 0 || !isGrounded)
+        {
+            footStepTimer = 0.1f;
+        }
+
+        if(isGrounded && (horizontalInput != 0 || verticalInput != 0))
+        {
+            footStepTimer -= Time.deltaTime;
+            if (footStepTimer < 0)
+            {
+                if(isSprinting)
+                {
+                    footStepTimer = footStepSprintInterval;
+                }
+                else if(isCrouching)
+                {
+                    footStepTimer = footStepCrouchInterval;
+
+                }
+                else
+                {
+                    footStepTimer = footStepWalkInterval;
+
+                }
+                if (isGrounded && ((horizontalInput != 0 || verticalInput != 0)))
+                {
+                    audioSource.PlayOneShot(footstepsArray[Random.Range(0, footstepsArray.Length)], 0.1f);
+                }
+
+                //audioSource.PlayOneShot(footstepsArray[Random.Range(0, footstepsArray.Length)], 0.1f);
+
+
+            }
+        }
     }
 
     private void Jump()
@@ -172,8 +250,12 @@ public class PlayerController : MonoBehaviour
 
         crouchStart = StartCoroutine(MoveCamera(playerCam, crouchCameraHeight));
         characterController.height = crouchHeight;
-        characterController.center = crouchCenter;
-        
+        //transform.position = transform.position + new Vector3(0, -0.5f, 0);
+        characterController.enabled = false;
+        transform.localPosition = new Vector3(transform.position.x, transform.localPosition.y - 0.5f, transform.position.z);
+        characterController.enabled = true;
+        //characterController.center = crouchCenter;
+
     }
 
     private void EndCrouch()
@@ -189,12 +271,16 @@ public class PlayerController : MonoBehaviour
         }
         crouchEnd =  StartCoroutine(MoveCamera(playerCam, normalCameraHeight));
         characterController.height = normalCCHeight;
-        characterController.center = normalCCCenter;
+        //transform.position = transform.position + new Vector3(0, 0.5f, 0);
+        characterController.enabled = false;
+        transform.localPosition = new Vector3(transform.position.x, transform.localPosition.y + 0.5f, transform.position.z);
+        characterController.enabled = true;
+        //characterController.center = normalCCCenter;
     }
 
     private void CrouchCheck()
     {
-        if(Physics.Raycast(playerCam.transform.position, Vector3.up, 0.5f))
+        if(Physics.Raycast(playerCam.transform.position, Vector3.up, 1f))
         {
             canUnCrouch = false;
         }
