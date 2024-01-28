@@ -67,12 +67,12 @@ public class PlayerController : MonoBehaviour, IcanPing
     private float currentAlert = 0;
     private float currentAttack = 0;
 
-    private float crouchAlert = 5;
-    private float crouchAttack = 3;
-    private float walkingAlert = 10;
-    private float walkingAttack = 5;
-    private float sprintingAlert = 15;
-    private float sprintingAttack = 10;
+    public float crouchAlert = 5;
+    public float crouchAttack = 3;
+    public float walkingAlert = 10;
+    public float walkingAttack = 5;
+    public float sprintingAlert = 15;
+    public float sprintingAttack = 10;
     public enum SoundLevel
     {
         level0 = 0, level1 = 1, level2 = 2, level3 = 3,

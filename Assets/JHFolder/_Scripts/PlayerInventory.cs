@@ -14,6 +14,8 @@ public class PlayerInventory : MonoBehaviour
     [Header("UI References")]
     public TMP_Text itemHoverText;
     public TMP_Text keysText;
+    public TMP_Text fadeText;
+    public GameObject escapedImage;
 
     [Header("Parameters")]
     public float PickUpRange = 5;
@@ -34,11 +36,15 @@ public class PlayerInventory : MonoBehaviour
     public bool hasBottle;
     [SerializeField] private int keysOwned;
 
+    bool isTextFading = false;
+
     // Start is called before the first frame update
     void Start()
     {
         itemHoverText.gameObject.SetActive(false);
         heldBottle.gameObject.SetActive(false);
+        escapedImage.gameObject.SetActive(false);
+        fadeText.alpha = 0f;
     }
 
     // Update is called once per frame
@@ -49,7 +55,7 @@ public class PlayerInventory : MonoBehaviour
         {
             heldBottle.gameObject.SetActive(false);
             GameObject bottle = Instantiate(throwingBottle, heldItemPosition.position, playerCam.transform.rotation);
-            bottle.GetComponent<BreakableBottle>().ThrowBottle(playerCam.transform.forward, 10);
+            bottle.GetComponent<BreakableBottle>().ThrowBottle(playerCam.transform.forward, 12);
             hasBottle = false;
         }
 
@@ -68,11 +74,30 @@ public class PlayerInventory : MonoBehaviour
         {
             if(hit.collider != null)
             {
-                IInteractable interactable = hit.collider.GetComponent<IInteractable>();
-                if (interactable != null)
+                //IInteractable interactable = hit.collider.GetComponent<IInteractable>();
+                //if (interactable != null)
+                //{
+                //    itemHoverText.gameObject.SetActive(true);
+                //}
+                //Debug.Log(hit.collider.name);
+                if (hit.collider.GetComponent<Key>())
                 {
                     itemHoverText.gameObject.SetActive(true);
+                    itemHoverText.text = "<color=\"red\">E</color>: Pick Up";
                 }
+
+                if (hit.collider.GetComponent<BottleItem>())
+                {
+                    itemHoverText.gameObject.SetActive(true);
+                    itemHoverText.text = "<color=\"red\">E</color>: Pick Up";
+                }
+
+                if (hit.collider.GetComponent<EscapeDoor>())
+                {
+                    itemHoverText.gameObject.SetActive(true);
+                    itemHoverText.text = "<color=\"red\">E</color>: Open";
+                }
+
             }
         }
         else
@@ -118,8 +143,53 @@ public class PlayerInventory : MonoBehaviour
 
                     }
                 }
+
+                if (hit.collider.GetComponent<EscapeDoor>())
+                {
+                    if(keysOwned < 3)
+                    {
+                        if(!isTextFading)
+                        StartCoroutine(TextFade(fadeText, 2));
+                    }
+                    else if(keysOwned >= 3)
+                    {
+                        escapedImage.SetActive(true);
+                        Time.timeScale = 0;
+                        Cursor.lockState = CursorLockMode.None;
+                        Cursor.visible = true;
+                    }
+                }
             }
         }
 
+    }
+
+    public IEnumerator TextFade(TMP_Text image, float duration)
+    {
+        isTextFading = true;
+        float elapsedTime = 0;
+        float startValue = image.color.a;
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+            float newAlpha = Mathf.Lerp(startValue, 1, elapsedTime / duration);
+            image.color = new Color(image.color.r, image.color.g, image.color.b, newAlpha);
+            yield return null;
+
+        }
+
+        yield return new WaitForSeconds(3.5f);
+
+        elapsedTime = 0;
+        startValue = image.color.a;
+
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+            float newAlpha = Mathf.Lerp(startValue, 0, elapsedTime / duration);
+            image.color = new Color(image.color.r, image.color.g, image.color.b, newAlpha);
+            yield return null;
+        }
+        isTextFading = false;
     }
 }

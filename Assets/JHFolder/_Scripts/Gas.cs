@@ -20,7 +20,9 @@ public class Gas : MonoBehaviour
         if(other.tag == "Player")
         {
             other.gameObject.GetComponent<Player>().Laughter(laughterBuildUp);
+            other.gameObject.GetComponent<Player>().isInGas = true;
             other.gameObject.GetComponent<Player>().canHoldBreath = false;
+
         }
     }
 
@@ -29,7 +31,9 @@ public class Gas : MonoBehaviour
         if (other.tag == "Player")
         {
             other.gameObject.GetComponent<Player>().FadeLaughterOverlay(false);
+            other.gameObject.GetComponent<Player>().isInGas= false;
             other.gameObject.GetComponent<Player>().canHoldBreath = true;
+
 
         }
     }

@@ -4,5 +4,11 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/JHFolder/MainMenu.unity
+    guid: fb0f98f20429215488caa3f5b41a4270
+  - enabled: 1
+    path: Assets/JHFolder/LKScene 1.unity
+    guid: 378126a088cd10a4b88bd08faeb58936
   m_configObjects: {}
